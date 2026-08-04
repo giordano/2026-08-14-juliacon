@@ -8,3 +8,13 @@ $font-family-sans-serif: 'Lato', sans-serif;
 $presentation-heading-font: 'Lato', sans-serif !default;
 $font-family-monospace: 'JuliaMono-Light', monospace !default;
 $presentation-heading-text-transform: none !default;
+
+/*-- scss:rules --*/
+
+// Widen a single slide beyond the default 1050px box (recentered by the
+// negative margin), so wide content like tables can use more of the page.
+.reveal .slides section.wide-slide {
+  width: 1200px !important;
+  margin-left: -175px;
+  // font-size: 0.8em;
+}

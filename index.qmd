@@ -152,7 +152,7 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 * Workers exceeding a memory threshold (`max_worker_rss`) are recycled
 * ~Zero configuration required
 
-## Escape hatches{.smaller}
+## Escape hatches{.wide-slide}
 
 * `testsuite`: provide your own `name => code` dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)
 * `init_code` / `init_worker_code`: set up each sandbox module / each worker
@@ -215,7 +215,7 @@ run_demo("--jobs=2", "--verbose")
 
 # Choosing testing package
 
-## Comparison{.smaller}
+## Comparison{.wide-slide}
 
 |                         | Parallelism        | Rewrite        | Isolation  | Filtering  |
 |-------------------------|--------------------|----------------|------------|------------|
