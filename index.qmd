@@ -1,5 +1,5 @@
 ---
-title: "Running tests in parallel with `ParallelTestRunner.jl`"
+title: "Running tests in parallel with `ParallelTestRunner`"
 author:
   - name: "Mosè Giordano"
     affiliation: "UCL"
@@ -53,7 +53,7 @@ end
 
 Various packages in the ecosystem already tried to address some of these shortcomings (more on this later)
 
-# `ParallelTestRunner.jl`
+# `ParallelTestRunner`
 
 ## History
 
