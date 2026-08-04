@@ -27,7 +27,7 @@ julia:
 
 ## Using the `Test` standard library
 
-```{.julia code-line-numbers="|3|4-9"}
+```{.julia code-line-numbers="|3,10|4-9"}
 using MyPackage, Test
 
 @testset "MyPackage" begin
@@ -106,8 +106,6 @@ runtests(MyPackage, ARGS)
 * Results are streamed back to the main process as they complete
 * `--jobs=N` controls the number of parallel workers
 
-. . .
-
 **File-level parallelism**: coarser than `ReTestItems.jl`'s per-`@testitem` scheduling, but requires no code changes
 
 ## A command-line interface
@@ -170,16 +168,16 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 
 ::: {.column width="45%"}
 ```{.default code-line-numbers="false"}
-Demo
+demo
 ├── Project.toml
 ├── src
 │   └── Demo.jl
 └── test
+    ├── arithmetic.jl
     ├── Project.toml
     ├── runtests.jl
-    ├── arithmetic.jl
-    ├── strings.jl
-    └── slow.jl
+    ├── slow.jl
+    └── strings.jl
 ```
 :::
 
@@ -202,7 +200,7 @@ function run_demo(args...)
     project = Base.active_project()
     dir = joinpath(dirname(project), "demo", "test")
     cmd = `$(Base.julia_cmd()) --project=$(project) runtests.jl $(collect(args))`
-    print(read(ignorestatus(setenv(cmd; dir)), String))
+    print(readchomp(ignorestatus(setenv(cmd; dir))))
 end
 nothing
 ```
