@@ -68,9 +68,6 @@ end
 * adapted by Tim Besard ([`@maleadt`](https://github.com/maleadt)) for CUDA.jl's test infrastructure...
 * ...and copied in all other packages of the GPU ecosystem
 * extracted and generalised as [JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl) by Valentin Churavy ([`@vchuravy`](https://github.com/vchuravy)) + many other contributors
-
-. . .
-
 * Purpose-built for large, slow, resource-hungry suites
 * Used by CUDA.jl, AMDGPU.jl, Enzyme.jl, and more
 
@@ -222,7 +219,6 @@ nothing
 `julia --project test/runtests.jl --list`
 
 ```{julia}
-#| echo: true
 run_demo("--list")
 ```
 
@@ -231,11 +227,10 @@ run_demo("--list")
 `julia --project test/runtests.jl --jobs=2 --verbose`
 
 ```{julia}
-#| echo: true
 run_demo("--jobs=2", "--verbose")
 ```
 
-# Choosing a test runner
+# Choosing testing package
 
 ## Comparison{.smaller}
 
@@ -256,7 +251,7 @@ run_demo("--jobs=2", "--verbose")
 * Need JUnit XML reports, or thread-based parallelism → `XUnit.jl`
 * Small, fast suite → plain `Test` is fine!
 
-## What it doesn't do (yet)
+## What `ParallelTestRunner.jl` doesn't do (yet)
 
 * No automatic retries of flaky tests (pending PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
 * Only prefix-based *inclusion* filters, no exclusion (issue [#134](https://github.com/JuliaTesting/ParallelTestRunner.jl/issues/134))
