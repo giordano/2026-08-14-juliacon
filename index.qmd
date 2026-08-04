@@ -210,7 +210,7 @@ runtests(Demo, ARGS)
 ```{julia}
 function run_demo(args...)
     project = Base.active_project()
-    dir = joinpath(dirname(project), "demo", "Demo", "test")
+    dir = joinpath(dirname(project), "demo", "test")
     cmd = `$(Base.julia_cmd()) --project=$(project) runtests.jl $(collect(args))`
     print(read(ignorestatus(setenv(cmd; dir)), String))
 end

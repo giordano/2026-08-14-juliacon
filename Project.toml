@@ -4,7 +4,7 @@ ParallelTestRunner = "d3525ed8-44d0-4b2c-a655-542cee43accc"
 quarto_jll = "b7163347-bfae-5fd9-aba4-19f139889d78"
 
 [sources]
-Demo = {path = "demo/Demo"}
+Demo = {path = "demo"}
 
 [compat]
 ParallelTestRunner = "2.6"
