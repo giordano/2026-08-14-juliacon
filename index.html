@@ -11,7 +11,7 @@
 
   <meta name="author" content="Mosè Giordano">
   <meta name="dcterms.date" content="2026-08-14">
-  <title>Running tests in parallel with ParallelTestRunner.jl</title>
+  <title>Running tests in parallel with ParallelTestRunner</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -197,7 +197,7 @@
     <div class="slides">
 
 <section class="quarto-title-block center">
-  <h1 class="title">Running tests in parallel with <code>ParallelTestRunner.jl</code></h1>
+  <h1 class="title">Running tests in parallel with <code>ParallelTestRunner</code></h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -247,7 +247,7 @@ Mosè Giordano
 </section></section>
 <section>
 <section class="title-slide slide level1 center">
-<h1><code>ParallelTestRunner.jl</code></h1>
+<h1><code>ParallelTestRunner</code></h1>
 
 </section>
 <section class="slide level2">
@@ -383,21 +383,21 @@ real terminal rather than executed at render time. -->
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
 <pre>Running 3 tests using 2 parallel jobs. If this is too many concurrent jobs, specify the `--jobs=N` argument to the tests, or set the `JULIA_CPU_THREADS` environment variable.
-Available memory: <span class="ansi-bold">5.299 GiB</span>; Max worker RSS: <span class="ansi-bold">2.930 GiB</span>
+Available memory: <span class="ansi-bold">5.321 GiB</span>; Max worker RSS: <span class="ansi-bold">2.930 GiB</span>
 <span class="ansi-white-fg">                 │ </span><span class="ansi-white-fg">  Test   │</span><span class="ansi-white-fg">   Init   │</span><span class="ansi-white-fg"> Compile │</span><span class="ansi-white-fg"> ──────────────── CPU ──────────────── │</span>
 <span class="ansi-white-fg">Test</span><span class="ansi-white-fg">    (Worker) │ </span><span class="ansi-white-fg">time (s) │</span><span class="ansi-white-fg"> time (s) │</span><span class="ansi-white-fg">   (%)   │</span><span class="ansi-white-fg"> GC (s) │ GC % │ Alloc (MB) │ RSS (MB) │</span>
-<span class="ansi-white-fg">strings      (1) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:21:00.837</span>
-<span class="ansi-white-fg">slow         (2) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:21:01.763</span>
-<span class="ansi-white-fg">strings</span><span class="ansi-white-fg">      (1) │ </span><span class="ansi-white-fg">    0.26 │ </span><span class="ansi-white-fg">    3.97 │ </span><span class="ansi-white-fg">  96.97 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      6.90 │ </span><span class="ansi-white-fg">  485.00</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">arithmetic   (1) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:21:02.641</span>
-<span class="ansi-white-fg">arithmetic</span><span class="ansi-white-fg">   (1) │ </span><span class="ansi-white-fg">    0.05 │ </span><span class="ansi-white-fg">    0.51 │ </span><span class="ansi-white-fg">  77.22 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      0.90 │ </span><span class="ansi-white-fg">  485.00</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">slow</span><span class="ansi-white-fg">         (2) │ </span><span class="ansi-white-fg">    2.27 │ </span><span class="ansi-white-fg">    5.33 │ </span><span class="ansi-white-fg">  11.12 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      7.07 │ </span><span class="ansi-white-fg">  485.00</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">strings      (1) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:25:05.961</span>
+<span class="ansi-white-fg">slow         (2) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:25:07.102</span>
+<span class="ansi-white-fg">strings</span><span class="ansi-white-fg">      (1) │ </span><span class="ansi-white-fg">    0.32 │ </span><span class="ansi-white-fg">    5.04 │ </span><span class="ansi-white-fg">  96.94 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      6.90 │ </span><span class="ansi-white-fg">  479.15</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">arithmetic   (1) │</span><span class="ansi-bright-black-fg">        started at 2026-08-04T23:25:08.158</span>
+<span class="ansi-white-fg">arithmetic</span><span class="ansi-white-fg">   (1) │ </span><span class="ansi-white-fg">    0.06 │ </span><span class="ansi-white-fg">    0.63 │ </span><span class="ansi-white-fg">  74.98 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      0.90 │ </span><span class="ansi-white-fg">  479.15</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">slow</span><span class="ansi-white-fg">         (2) │ </span><span class="ansi-white-fg">    2.34 │ </span><span class="ansi-white-fg">    6.47 │ </span><span class="ansi-white-fg">  14.14 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      7.07 │ </span><span class="ansi-white-fg">  479.15</span><span class="ansi-white-fg"> │</span>
 
-<span class="ansi-bold">Test Summary:  | </span><span class="ansi-green-fg ansi-bold">Pass  </span><span class="ansi-cyan-fg ansi-bold">Total  </span><span class="ansi-bold">Time</span>
-  Overall      | <span class="ansi-green-fg">   8  </span><span class="ansi-cyan-fg">    8  </span>9.7s
-    strings    | <span class="ansi-green-fg">   2  </span><span class="ansi-cyan-fg">    2  </span>0.2s
-    arithmetic | <span class="ansi-green-fg">   5  </span><span class="ansi-cyan-fg">    5  </span>0.0s
-    slow       | <span class="ansi-green-fg">   1  </span><span class="ansi-cyan-fg">    1  </span>2.2s
+<span class="ansi-bold">Test Summary:  | </span><span class="ansi-green-fg ansi-bold">Pass  </span><span class="ansi-cyan-fg ansi-bold">Total  </span><span class="ansi-bold"> Time</span>
+  Overall      | <span class="ansi-green-fg">   8  </span><span class="ansi-cyan-fg">    8  </span>11.2s
+    strings    | <span class="ansi-green-fg">   2  </span><span class="ansi-cyan-fg">    2  </span> 0.2s
+    arithmetic | <span class="ansi-green-fg">   5  </span><span class="ansi-cyan-fg">    5  </span> 0.1s
+    slow       | <span class="ansi-green-fg">   1  </span><span class="ansi-cyan-fg">    1  </span> 2.2s
 <span class="ansi-green-fg ansi-bold">    SUCCESS</span></pre>
 </div>
 </div>
@@ -415,8 +415,8 @@ Available memory: <span class="ansi-bold">5.299 GiB</span>; Max worker RSS: <spa
 <col style="width: 29%">
 <col style="width: 23%">
 <col style="width: 18%">
-<col style="width: 14%">
-<col style="width: 14%">
+<col style="width: 12%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -468,7 +468,7 @@ Available memory: <span class="ansi-bold">5.299 GiB</span>; Max worker RSS: <spa
 <td>✅ procs, per file</td>
 <td>~none</td>
 <td>✅</td>
-<td>prefix</td>
+<td>files prefix</td>
 </tr>
 </tbody>
 </table>
