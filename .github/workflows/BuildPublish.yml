@@ -44,7 +44,6 @@ jobs:
         channel: '1.12'
 
     - name: Load Julia packages from cache
-      id: julia-cache
       uses: julia-actions/cache@v3
 
     - name: Install dependencies
@@ -75,12 +74,3 @@ jobs:
         run(`$(quarto()) publish --no-prompt --no-browser gh-pages index.qmd`)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Save Julia depot cache on cancel or failure
-      id: julia-cache-save
-      if: cancelled() || failure()
-      uses: actions/cache/save@v6
-      with:
-        path: |
-          ${{ steps.julia-cache.outputs.cache-paths }}
-        key: ${{ steps.julia-cache.outputs.cache-key }}
