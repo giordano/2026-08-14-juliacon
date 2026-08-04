@@ -55,7 +55,7 @@ Various packages in the ecosystem already tried to address some of these shortco
 
 # `ParallelTestRunner.jl`
 
-## Lineage
+## History
 
 * Julia's [`Base.runtests`](https://docs.julialang.org/en/v1/stdlib/Test/#Base.runtests) parallel harness
 * adapted by Tim Besard ([`@maleadt`](https://github.com/maleadt)) for CUDA.jl's test infrastructure...
@@ -144,7 +144,7 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 * Live status bar: running tests, per-worker stats, ETA
 * Worker output is captured and printed without interleaving
 
-## Scheduling smarts
+## Scheduling strategy
 
 * Duration and pass/fail history of each test is persisted in a scratch directory
 * Longest-running tests are scheduled first for better load balancing
