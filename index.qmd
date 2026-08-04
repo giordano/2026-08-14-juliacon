@@ -51,14 +51,7 @@ end
 * A failure at minute 40 wastes the previous 39 minutes
 * Running *only* `linalg.jl` means editing `runtests.jl`
 
-## Prior art in the ecosystem
-
-* `Test` (stdlib): serial, no discovery, no isolation
-* `SafeTestsets.jl`: isolation via module wrapping, still serial
-* `TestItems.jl` / `TestItemRunner.jl`: `@testitem` blocks, VS Code integration
-* `ReTestItems.jl`: parallel `@testitem` runner
-* `XUnit.jl`: threaded `@testcase`s, JUnit XML
-* ...and Base Julia's own `test/runtests.jl`: parallel and battle-tested for over a decade, but never packaged for reuse
+Various packages in the ecosystem already tried to address some of these shortcomings (more on this later)
 
 # `ParallelTestRunner.jl`
 
@@ -212,14 +205,6 @@ function run_demo(args...)
     print(read(ignorestatus(setenv(cmd; dir)), String))
 end
 nothing
-```
-
-## Discovery
-
-`julia --project test/runtests.jl --list`
-
-```{julia}
-run_demo("--list")
 ```
 
 ## Parallel run{.scrollable}
