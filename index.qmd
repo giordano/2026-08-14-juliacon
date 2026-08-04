@@ -217,14 +217,14 @@ run_demo("--jobs=2", "--verbose")
 
 ## Comparison{.wide-slide}
 
-|                         | Parallelism        | Rewrite        | Isolation  | Filtering  |
-|-------------------------|--------------------|----------------|------------|------------|
-| `Test`                  | ❌                 | —              | ❌         | ❌         |
-| `SafeTestsets.jl`       | ❌                 | `@safetestset` | ✅         | ❌         |
-| `TestItemRunner.jl`     | ❌                 | `@testitem`    | ✅         | tags       |
-| `ReTestItems.jl`        | ✅ procs, per item | `@testitem`    | ✅         | name, tags |
-| `XUnit.jl`              | ✅ threads         | `@testcase`    | ❌         | ✅         |
-| `ParallelTestRunner.jl` | ✅ procs, per file | ~none          | ✅         | prefix     |
+|                         | Parallelism        | Rewrite        | Isolation | Filtering    |
+|-------------------------|--------------------|----------------|-----------|--------------|
+| `Test`                  | ❌                 | —              | ❌        | ❌           |
+| `SafeTestsets.jl`       | ❌                 | `@safetestset` | ✅        | ❌           |
+| `TestItemRunner.jl`     | ❌                 | `@testitem`    | ✅        | tags         |
+| `ReTestItems.jl`        | ✅ procs, per item | `@testitem`    | ✅        | name, tags   |
+| `XUnit.jl`              | ✅ threads         | `@testcase`    | ❌        | ✅           |
+| `ParallelTestRunner.jl` | ✅ procs, per file | ~none          | ✅        | files prefix |
 
 ## When to choose what
 
