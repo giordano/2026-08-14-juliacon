@@ -1,6 +1,5 @@
 ---
-title: "`ParallelTestRunner.jl`"
-subtitle: "Run your existing test suite, in parallel"
+title: "Running tests in parallel with `ParallelTestRunner.jl`"
 author:
   - name: "Mosè Giordano"
     affiliation: "UCL"
@@ -21,12 +20,12 @@ format:
 date: 2026-08-14
 engine: julia
 julia:
-    exeflags: ["+1.12"]
+    exeflags: ["--color=yes"]
 ---
 
 # The problem
 
-## How Julia packages test today
+## Using the `Test` standard library
 
 ```{.julia code-line-numbers="|3|4-9"}
 using MyPackage, Test
@@ -44,7 +43,7 @@ end
 * One process
 * One file after the other, top to bottom
 
-## Why that hurts
+## Limitations
 
 * Wall-clock time grows linearly with the size of the test suite
 * CI machines have many cores... mostly idle
@@ -65,14 +64,15 @@ end
 
 ## Lineage
 
-* Base Julia's `test/runtests.jl` parallel harness
-* → adapted by Tim Besard (@maleadt) for CUDA.jl's test infrastructure
-* → extracted and generalised as [JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl)
+* Julia's [`Base.runtests`](https://docs.julialang.org/en/v1/stdlib/Test/#Base.runtests) parallel harness
+* adapted by Tim Besard ([`@maleadt`](https://github.com/maleadt)) for CUDA.jl's test infrastructure...
+* ...and copied in all other packages of the GPU ecosystem
+* extracted and generalised as [JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl) by Valentin Churavy ([`@vchuravy`](https://github.com/vchuravy)) + many other contributors
 
 . . .
 
 * Purpose-built for large, slow, resource-hungry suites
-* Used by CUDA.jl, AMDGPU.jl, and more
+* Used by CUDA.jl, AMDGPU.jl, Enzyme.jl, and more
 
 ## Migration is a deletion
 
@@ -111,16 +111,16 @@ runtests(MyPackage, ARGS)
 
 ## Execution model
 
-* Each test file runs in a separate worker *process* ([Malt.jl](https://github.com/JuliaPluto/Malt.jl))
+* Each test file runs in a separate worker *process* ([`JuliaPluto/Malt.jl`](https://github.com/JuliaPluto/Malt.jl))
 * ...inside a freshly generated sandbox module: isolation for free
 * Results are streamed back to the main process as they complete
-* `--jobs=N` controls the number of workers
+* `--jobs=N` controls the number of parallel workers
 
 . . .
 
-File-level parallelism: coarser than `ReTestItems.jl`'s per-`@testitem` scheduling, but requires no code changes
+**File-level parallelism**: coarser than `ReTestItems.jl`'s per-`@testitem` scheduling, but requires no code changes
 
-## A command-line interface, for free
+## A command-line interface
 
 ```{.default code-line-numbers="false"}
 Usage: runtests.jl [--help] [--list] [--jobs=N] [TESTS...]
@@ -159,18 +159,16 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 ## Scheduling smarts
 
 * Duration and pass/fail history of each test is persisted in a scratch directory
-* Longest-running tests are scheduled first → better packing of the workers
-* Previously-failing tests are scheduled first → fail fast on re-runs
+* Longest-running tests are scheduled first for better load balancing
+* Previously-failing tests are scheduled first to fail fast on re-runs
 * Workers exceeding a memory threshold (`max_worker_rss`) are recycled
-* Zero configuration required
+* ~Zero configuration required
 
-## Escape hatches
+## Escape hatches{.smaller}
 
-For when your suite is not just plain files:
-
-* `testsuite`: provide your own `name => code` dictionary instead of autodiscovery
+* `testsuite`: provide your own `name => code` dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)
 * `init_code` / `init_worker_code`: set up each sandbox module / each worker
-* `test_worker`: pin a test to a specific worker (e.g. main-thread-only tests, as in AMDGPU.jl)
+* `test_worker`: create a custom worker (for example with specific environment variables, or different Julia flags)
 * `RecordType` + `custom_args`: collect domain-specific metrics per test (how the GPU packages track device memory)
 * `exename` / `exeflags` / `env`: control how workers are launched
 
@@ -182,11 +180,12 @@ For when your suite is not just plain files:
 
 ::: {.column width="45%"}
 ```{.default code-line-numbers="false"}
-demo/Demo
+Demo
 ├── Project.toml
 ├── src
 │   └── Demo.jl
 └── test
+    ├── Project.toml
     ├── runtests.jl
     ├── arithmetic.jl
     ├── strings.jl
@@ -238,7 +237,7 @@ run_demo("--jobs=2", "--verbose")
 
 # Choosing a test runner
 
-## Comparison
+## Comparison{.smaller}
 
 |                         | Parallelism        | Rewrite        | Isolation  | Filtering  |
 |-------------------------|--------------------|----------------|------------|------------|
@@ -259,33 +258,20 @@ run_demo("--jobs=2", "--verbose")
 
 ## What it doesn't do (yet)
 
-* No automatic retries of flaky tests
-* Only prefix-based *inclusion* filters, no exclusion ([#134](https://github.com/JuliaTesting/ParallelTestRunner.jl/issues/134))
+* No automatic retries of flaky tests (pending PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
+* Only prefix-based *inclusion* filters, no exclusion (issue [#134](https://github.com/JuliaTesting/ParallelTestRunner.jl/issues/134))
 * No JUnit XML output
 * No editor integration
-
-. . .
 
 Contributions welcome!
 
 # Conclusions
 
 * Parallelism + isolation + a CLI, for the price of *deleting* code
-* Battle-tested design: Base Julia → CUDA.jl → `ParallelTestRunner.jl`
+* Battle-tested: [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages already
 * Give it a try:
     * [github.com/JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl)
     * [juliatesting.github.io/ParallelTestRunner.jl](https://juliatesting.github.io/ParallelTestRunner.jl/)
-
-# {data-menu-title="QR Code"}
-
-::: {layout="[22,78]"}
-
-QR code to see this presentation
-
-{{< qrcode "https://giordano.github.io/2026-08-14-juliacon/"
-colorDark="#ffffff" colorLight="#000000" height=550 width=550 >}}
-
-:::
 
 <!-- Local Variables: -->
 <!-- mode: markdown -->

@@ -1,0 +1,10 @@
+[deps]
+Demo = "2b85555c-aeb5-4028-83e5-36da634b75a1"
+ParallelTestRunner = "d3525ed8-44d0-4b2c-a655-542cee43accc"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+ParallelTestRunner = "2"
+
+[sources]
+Demo = {path = ".."}
