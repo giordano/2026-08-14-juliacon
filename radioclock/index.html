@@ -12,7 +12,7 @@
 
   <meta name="author" content="Mosè Giordano">
   <meta name="dcterms.date" content="2026-08-14">
-  <title>Mosè Giordano's JuliaCon 2026 presentations – Decoding radio time signals with RadioClock.jl</title>
+  <title>Decoding radio time signals with RadioClock.jl</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -222,7 +222,7 @@ Mosè Giordano
 <h2>Radio-controlled clocks</h2>
 <ul>
 <li>Cheap clocks, watches, weather stations that are always right: no internet, no GPS, just a small longwave antenna</li>
-<li>In central Europe they listen to <strong>DCF77</strong>: <strong>D</strong>eutschland, long wave (<strong>C</strong>), <strong>F</strong>rankfurt, at <strong>77</strong>.5 kHz</li>
+<li>In central Europe they listen to <strong>DCF77</strong>: <strong>D</strong>eutschland, <strong>C</strong>all sign for radio clocks, <strong>F</strong>rankfurt, at <strong>77</strong>.5 kHz</li>
 <li>Transmitter in Mainflingen (55 km from Mainz!), operated on behalf of <a href="https://www.ptb.de/">PTB</a>, Germany’s national metrology institute</li>
 <li>On air since 1959, steered by atomic clocks, reaches ~2000 km — most of Europe</li>
 <li>Similar stations elsewhere: MSF (UK), WWVB (US), JJY (Japan)</li>
@@ -341,8 +341,8 @@ Binary representation: 000000000000000001001000100100000011111010001111001010010
 </div>
 </div>
 </section>
-<section class="slide level2 scrollable">
-<h2>Radio is noisy: <code>decode</code> checks everything</h2>
+<section class="slide level2">
+<h2>Consistency checks</h2>
 <ul>
 <li>Fixed bits are correct (0, 20, 59)</li>
 <li>Even parity of minutes, hours, and date fields</li>
@@ -367,7 +367,7 @@ Stacktrace:
 <section class="slide level2">
 <h2>Time zones-aware</h2>
 <ul>
-<li><code>decode</code> returns a <code>ZonedDateTime</code>, not a naive timestamp</li>
+<li><code>decode</code> returns a <code>ZonedDateTime</code>, not a <code>DateTime</code></li>
 <li>The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from <a href="https://github.com/JuliaTime/TimeZones.jl"><code>TimeZones.jl</code></a></li>
 <li>The summer time announcement bit must agree with an actual upcoming transition</li>
 <li>The year is represented with only two digits: the signal itself is ambiguous, <code>RadioClock.jl</code> assumes 2000–2099</li>
@@ -391,47 +391,37 @@ Binary representation: 000000000000000001001000011000000101001010101000100110010
 <pre><code>true</code></pre>
 </div>
 </div>
-<p>Handy for generating test data — or for a transmitter of your own<sup>1</sup></p>
-<aside><ol class="aside-footnotes"><li id="fn1"><p>check your local radio regulations before powering an antenna at 77.5 kHz…</p></li></ol></aside></section>
+<p>Handy for generating test data</p>
+</section>
 <section class="slide level2">
 <h2>Implementation notes</h2>
 <ul>
-<li>The whole signal is one <code>UInt64</code>: masks and shifts, no arrays, no allocations</li>
-<li>Small reusable helpers: 2-digit BCD encode/decode, even parity over a bit range</li>
-<li><code>DCF77</code> is an empty struct, a subtype of <code>RadioSignal</code>, used purely for dispatch:</li>
-</ul>
+<li><p>The whole signal is one <code>UInt64</code>: masks and shifts, no arrays, no allocations</p></li>
+<li><p>Small reusable helpers: 2-digit BCD encode/decode, even parity over a bit range</p></li>
+<li><p><code>DCF77</code> is an empty struct, a subtype of <code>RadioSignal</code>, used purely for dispatch:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">decode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, data<span class="op">::</span><span class="dt">DCF77Data</span>) <span class="op">-&gt;</span> ZonedDateTime</span>
-<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">encode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, zdt<span class="op">::</span><span class="dt">ZonedDateTime</span>) <span class="op">-&gt;</span> DCF77Data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Errors are descriptive: they tell you <em>which</em> consistency check failed and on what input</li>
+<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">encode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, zdt<span class="op">::</span><span class="dt">ZonedDateTime</span>) <span class="op">-&gt;</span> DCF77Data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
 </ul>
 </section>
 <section class="slide level2">
 <h2>Live demo time</h2>
-</section>
-<section class="slide level2">
-<h2>What’s next</h2>
-<ul>
-<li>More signals behind the same <code>RadioSignal</code> abstraction:
-<ul>
-<li>MSF (60 kHz, UK), WWVB (60 kHz, US), JJY (40/60 kHz, Japan)</li>
-</ul></li>
-<li>Handling the encrypted weather forecast bits is left as an exercise to the reader</li>
-</ul>
-<p>Contributions welcome!</p>
 </section></section>
 <section class="title-slide slide level1 center">
 <h1>Conclusions</h1>
 <div class="columns">
 <div class="column" style="width:60%;">
 <ul>
-<li>DCF77 in, <code>ZonedDateTime</code> out — and back</li>
-<li>Every consistency check the signal allows, including time-zone sanity</li>
+<li>Wishlist: more signals behind the same <code>RadioSignal</code> abstraction
+<ul>
+<li>MSF (60 kHz, UK), WWVB (60 kHz, US), JJY (40/60 kHz, Japan)</li>
+</ul></li>
 <li>Give it a try:</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Pkg</span></span>
 <span id="cb11-2"><a aria-hidden="true" tabindex="-1"></a><span class="bu">Pkg</span>.<span class="fu">add</span>(url <span class="op">=</span> <span class="st">"https://github.com/giordano/RadioClock.jl"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column" style="width:40%;">
+</div><div class="column" style="width:5%;">
+
+</div><div class="column" style="width:35%;">
 <div id="" class="qrcode"></div>
 <script type="text/javascript">
 (function() {
@@ -442,7 +432,7 @@ Binary representation: 000000000000000001001000011000000101001010101000100110010
 })();
 </script>
     
-<p><a href="https://github.com/giordano/RadioClock.jl">github.com/giordano/RadioClock.jl</a></p>
+<p><a href="https://github.com/giordano/RadioClock.jl" class="uri">https://github.com/giordano/RadioClock.jl</a></p>
 </div></div>
 <!-- Local Variables: -->
 <!-- mode: markdown -->
@@ -451,8 +441,6 @@ Binary representation: 000000000000000001001000011000000101001010101000100110010
 
 
 </section>
-
-
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
