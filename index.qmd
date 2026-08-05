@@ -1,5 +1,5 @@
 ---
-title: "JuliaCon 2026 presentations"
+title: "Mosè Giordano's JuliaCon 2026 presentations"
 format: html
 engine: markdown
 ---
