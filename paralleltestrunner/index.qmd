@@ -15,7 +15,7 @@ format:
       useTextContentForMissingTitles: false
     preview-links: true
     slide-number: true
-    theme: [moon, custom.scss]
+    theme: [moon, ../custom.scss]
     transition: fade
 date: 2026-08-14
 engine: julia
@@ -198,7 +198,7 @@ runtests(Demo, ARGS)
 ```{julia}
 function run_demo(args...)
     project = Base.active_project()
-    dir = joinpath(dirname(project), "demo", "test")
+    dir = joinpath(dirname(project), "paralleltestrunner", "demo", "test")
     cmd = `$(Base.julia_cmd()) --project=$(project) runtests.jl $(collect(args))`
     print(readchomp(ignorestatus(setenv(cmd; dir))))
 end
