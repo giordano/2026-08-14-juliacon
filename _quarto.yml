@@ -1,3 +1,6 @@
 project:
-  title: "JuliaCon 2026"
+  type: website
   output-dir: _site
+
+website:
+  title: "Mosè Giordano's JuliaCon 2026 presentations"
