@@ -6,12 +6,13 @@
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/quarto-contrib/qrcodejs-v1.0.0/qrcode.js"></script><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.38">
 
   <meta name="author" content="Mosè Giordano">
   <meta name="dcterms.date" content="2026-08-14">
-  <title>Mosè Giordano's JuliaCon 2026 presentations – Running tests in parallel with ParallelTestRunner</title>
+  <title>Mosè Giordano's JuliaCon 2026 presentations – Decoding radio time signals with RadioClock.jl</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -197,7 +198,7 @@
     <div class="slides">
 
 <section class="quarto-title-block center">
-  <h1 class="title">Running tests in parallel with <code>ParallelTestRunner</code></h1>
+  <h1 class="title">Decoding radio time signals with <code>RadioClock.jl</code></h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -214,296 +215,235 @@ Mosè Giordano
 </section>
 <section>
 <section class="title-slide slide level1 center">
-<h1>The problem</h1>
+<h1>How does your wall clock know the time?</h1>
 
 </section>
 <section class="slide level2">
-<h2>Using the <code>Test</code> standard library</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-code-line-numbers="|3,10|4-9"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a></a><span class="im">using</span> <span class="bu">MyPackage</span>, <span class="bu">Test</span></span>
-<span id="cb1-2"><a></a></span>
-<span id="cb1-3"><a></a><span class="pp">@testset</span> <span class="st">"MyPackage"</span> <span class="cf">begin</span></span>
-<span id="cb1-4"><a></a>    <span class="fu">include</span>(<span class="st">"core.jl"</span>)</span>
-<span id="cb1-5"><a></a>    <span class="fu">include</span>(<span class="st">"linalg.jl"</span>)</span>
-<span id="cb1-6"><a></a>    <span class="fu">include</span>(<span class="st">"io.jl"</span>)</span>
-<span id="cb1-7"><a></a>    <span class="fu">include</span>(<span class="st">"serialization.jl"</span>)</span>
-<span id="cb1-8"><a></a>    <span class="fu">include</span>(<span class="st">"integration.jl"</span>)</span>
-<span id="cb1-9"><a></a>    <span class="co"># ...</span></span>
-<span id="cb1-10"><a></a><span class="cf">end</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<h2>Radio-controlled clocks</h2>
 <ul>
-<li>One process</li>
-<li>One file after the other, top to bottom</li>
+<li>Cheap clocks, watches, weather stations that are always right: no internet, no GPS, just a small longwave antenna</li>
+<li>In central Europe they listen to <strong>DCF77</strong>: <strong>D</strong>eutschland, long wave (<strong>C</strong>), <strong>F</strong>rankfurt, at <strong>77</strong>.5 kHz</li>
+<li>Transmitter in Mainflingen (55 km from Mainz!), operated on behalf of <a href="https://www.ptb.de/">PTB</a>, Germany’s national metrology institute</li>
+<li>On air since 1959, steered by atomic clocks, reaches ~2000 km — most of Europe</li>
+<li>Similar stations elsewhere: MSF (UK), WWVB (US), JJY (Japan)</li>
 </ul>
 </section>
 <section class="slide level2">
-<h2>Limitations</h2>
+<h2>One bit per second</h2>
 <ul>
-<li>Wall-clock time grows linearly with the size of the test suite</li>
-<li>CI machines have many cores… mostly idle</li>
-<li>State leaks between <code>include</code>d files (<code>using</code>, globals, method redefinitions)</li>
-<li>A failure at minute 40 wastes the previous 39 minutes</li>
-<li>Running <em>only</em> <code>linalg.jl</code> means editing <code>runtests.jl</code></li>
+<li>At the start of every second the carrier amplitude drops briefly:
+<ul>
+<li>drop for 0.1 s → bit <code>0</code></li>
+<li>drop for 0.2 s → bit <code>1</code></li>
+</ul></li>
+<li>Second 59: no drop at all — that silence marks the start of the next minute</li>
+<li>59 bits per minute ≈ <strong>1 baud</strong>: possibly the slowest data stream you rely on daily</li>
+<li>Each minute transmits the date and time of the <em>following</em> minute (other protcols are different!)</li>
 </ul>
-<p>Various packages in the ecosystem already tried to address some of these shortcomings (more on this later)</p>
-</section></section>
-<section>
-<section class="title-slide slide level1 center">
-<h1><code>ParallelTestRunner</code></h1>
+</section>
+<section class="slide level2">
+<h2>Signal amplitude example</h2>
 
-</section>
-<section class="slide level2">
-<h2>History</h2>
-<ul>
-<li>Julia’s <a href="https://docs.julialang.org/en/v1/stdlib/Test/#Base.runtests"><code>Base.runtests</code></a> parallel harness</li>
-<li>adapted by Tim Besard (<a href="https://github.com/maleadt"><code>@maleadt</code></a>) for CUDA.jl’s test infrastructure…</li>
-<li>…and copied in all other packages of the GPU ecosystem</li>
-<li>extracted and generalised as <a href="https://github.com/JuliaTesting/ParallelTestRunner.jl">JuliaTesting/ParallelTestRunner.jl</a> by Valentin Churavy (<a href="https://github.com/vchuravy"><code>@vchuravy</code></a>) + many other contributors</li>
-<li>Purpose-built for large, slow, resource-hungry suites</li>
-<li>Used by CUDA.jl, AMDGPU.jl, Enzyme.jl, and more</li>
-</ul>
-</section>
-<section class="slide level2">
-<h2>Migration is a deletion</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p>Before:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">MyPackage</span>, <span class="bu">Test</span></span>
-<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@testset</span> <span class="st">"MyPackage"</span> <span class="cf">begin</span></span>
-<span id="cb2-4"><a aria-hidden="true" tabindex="-1"></a>    <span class="fu">include</span>(<span class="st">"core.jl"</span>)</span>
-<span id="cb2-5"><a aria-hidden="true" tabindex="-1"></a>    <span class="fu">include</span>(<span class="st">"linalg.jl"</span>)</span>
-<span id="cb2-6"><a aria-hidden="true" tabindex="-1"></a>    <span class="fu">include</span>(<span class="st">"io.jl"</span>)</span>
-<span id="cb2-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
-<span id="cb2-8"><a aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column" style="width:50%;">
-<p>After:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">MyPackage</span></span>
-<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">ParallelTestRunner</span></span>
-<span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a><span class="fu">runtests</span>(MyPackage, <span class="cn">ARGS</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div></div>
-<ul>
-<li>Every <code>.jl</code> file in <code>test/</code> (except <code>runtests.jl</code>) is autodiscovered as an independent test</li>
-<li>No macros, no annotations, no rewrite of the test files themselves</li>
-</ul>
-</section>
-<section class="slide level2">
-<h2>Execution model</h2>
-<ul>
-<li>Each test file runs in a separate worker <em>process</em> (<a href="https://github.com/JuliaPluto/Malt.jl"><code>JuliaPluto/Malt.jl</code></a>)</li>
-<li>…inside a freshly generated sandbox module: isolation for free</li>
-<li>Results are streamed back to the main process as they complete</li>
-<li><code>--jobs=N</code> controls the number of parallel workers</li>
-</ul>
-<p><strong>File-level parallelism</strong>: coarser than <code>ReTestItems.jl</code>’s per-<code>@testitem</code> scheduling, but requires no code changes</p>
-</section>
-<section class="slide level2">
-<h2>A command-line interface</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a>Usage: runtests.jl [--help] [--list] [--jobs=N] [TESTS...]</span>
-<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a aria-hidden="true" tabindex="-1"></a>   --help             Show this text.</span>
-<span id="cb4-4"><a aria-hidden="true" tabindex="-1"></a>   --list             List all available tests.</span>
-<span id="cb4-5"><a aria-hidden="true" tabindex="-1"></a>   --verbose          Print more information during testing.</span>
-<span id="cb4-6"><a aria-hidden="true" tabindex="-1"></a>   --quickfail        Fail the entire run as soon as a single test errored.</span>
-<span id="cb4-7"><a aria-hidden="true" tabindex="-1"></a>   --jobs=N           Launch `N` processes to perform tests.</span>
-<span id="cb4-8"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a aria-hidden="true" tabindex="-1"></a>   Remaining arguments filter the tests that will be executed.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><code>julia --project test/runtests.jl linalg</code> runs only tests whose name starts with <code>linalg</code></li>
-<li>Also works through <code>Pkg.test(test_args=["linalg"])</code></li>
-</ul>
-</section>
-<section class="slide level2">
-<h2>What it looks like</h2>
-<!-- The live status bar is only rendered on a TTY, so this is captured from a
-real terminal rather than executed at render time. -->
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a>Running 3 tests using 2 parallel jobs.</span>
-<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a>                 │   Test   │ ──────────────── CPU ──────────────── │</span>
-<span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a>Test    (Worker) │ time (s) │ GC (s) │ GC % │ Alloc (MB) │ RSS (MB) │</span>
-<span id="cb5-4"><a aria-hidden="true" tabindex="-1"></a>strings      (1) │     0.14 │   0.00 │  0.0 │       6.90 │   454.56 │</span>
-<span id="cb5-5"><a aria-hidden="true" tabindex="-1"></a>arithmetic   (2) │     0.15 │   0.00 │  0.0 │       7.64 │   454.56 │</span>
-<span id="cb5-6"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a aria-hidden="true" tabindex="-1"></a>Running:  slow</span>
-<span id="cb5-8"><a aria-hidden="true" tabindex="-1"></a>Progress: 2/3 tests completed │ ETA: ~0 min</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Live status bar: running tests, per-worker stats, ETA</li>
-<li>Worker output is captured and printed without interleaving</li>
-</ul>
-</section>
-<section class="slide level2">
-<h2>Scheduling strategy</h2>
-<ul>
-<li>Duration and pass/fail history of each test is persisted in a scratch directory</li>
-<li>Longest-running tests are scheduled first for better load balancing</li>
-<li>Previously-failing tests are scheduled first to fail fast on re-runs</li>
-<li>Workers exceeding a memory threshold (<code>max_worker_rss</code>) are recycled</li>
-<li>~Zero configuration required</li>
-</ul>
-</section>
-<section class="slide level2 wide-slide">
-<h2>Escape hatches</h2>
-<ul>
-<li><code>testsuite</code>: provide your own <code>name =&gt; code</code> dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)</li>
-<li><code>init_code</code> / <code>init_worker_code</code>: set up each sandbox module / each worker</li>
-<li><code>test_worker</code>: create a custom worker (for example with specific environment variables, or different Julia flags)</li>
-<li><code>RecordType</code> + <code>custom_args</code>: collect domain-specific metrics per test (how the GPU packages track device memory)</li>
-<li><code>exename</code> / <code>exeflags</code> / <code>env</code>: control how workers are launched</li>
-</ul>
-</section></section>
-<section>
-<section class="title-slide slide level1 center">
-<h1>Demo</h1>
-
-</section>
-<section class="slide level2">
-<h2>A toy package</h2>
-<div class="columns">
-<div class="column" style="width:45%;">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>demo</span>
-<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>├── Project.toml</span>
-<span id="cb6-3"><a aria-hidden="true" tabindex="-1"></a>├── src</span>
-<span id="cb6-4"><a aria-hidden="true" tabindex="-1"></a>│   └── Demo.jl</span>
-<span id="cb6-5"><a aria-hidden="true" tabindex="-1"></a>└── test</span>
-<span id="cb6-6"><a aria-hidden="true" tabindex="-1"></a>    ├── arithmetic.jl</span>
-<span id="cb6-7"><a aria-hidden="true" tabindex="-1"></a>    ├── Project.toml</span>
-<span id="cb6-8"><a aria-hidden="true" tabindex="-1"></a>    ├── runtests.jl</span>
-<span id="cb6-9"><a aria-hidden="true" tabindex="-1"></a>    ├── slow.jl</span>
-<span id="cb6-10"><a aria-hidden="true" tabindex="-1"></a>    └── strings.jl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column" style="width:55%;">
-<p><code>test/runtests.jl</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Demo</span>, <span class="bu">ParallelTestRunner</span></span>
-<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a aria-hidden="true" tabindex="-1"></a><span class="fu">runtests</span>(Demo, <span class="cn">ARGS</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div></div>
-<p><code>test/arithmetic.jl</code>, <code>test/strings.jl</code>, <code>test/slow.jl</code> are plain <code>Test</code> files, no <code>include</code> anywhere</p>
-</section>
+<img data-src="DCF77_code.png" class="r-stretch quarto-figure-center"><p class="caption">Amplitude modulated signal of DCF77 as a function of time (source: <a href="https://commons.wikimedia.org/wiki/File:DCF77_code.svg" class="uri">https://commons.wikimedia.org/wiki/File:DCF77_code.svg</a>)</p></section>
 <section class="slide level2 scrollable">
-<h2>Parallel run</h2>
-<p><code>julia --project test/runtests.jl --jobs=2 --verbose</code></p>
-<div id="4" class="cell" data-execution_count="1">
-<div class="cell-output cell-output-stdout">
-<div class="ansi-escaped-output">
-<pre>Running 3 tests using 2 parallel jobs. If this is too many concurrent jobs, specify the `--jobs=N` argument to the tests, or set the `JULIA_CPU_THREADS` environment variable.
-Available memory: <span class="ansi-bold">5.159 GiB</span>; Max worker RSS: <span class="ansi-bold">2.930 GiB</span>
-<span class="ansi-white-fg">                 │ </span><span class="ansi-white-fg">  Test   │</span><span class="ansi-white-fg">   Init   │</span><span class="ansi-white-fg"> Compile │</span><span class="ansi-white-fg"> ──────────────── CPU ──────────────── │</span>
-<span class="ansi-white-fg">Test</span><span class="ansi-white-fg">    (Worker) │ </span><span class="ansi-white-fg">time (s) │</span><span class="ansi-white-fg"> time (s) │</span><span class="ansi-white-fg">   (%)   │</span><span class="ansi-white-fg"> GC (s) │ GC % │ Alloc (MB) │ RSS (MB) │</span>
-<span class="ansi-white-fg">slow         (1) │</span><span class="ansi-bright-black-fg">        started at 2026-08-05T11:40:23.968</span>
-<span class="ansi-white-fg">strings      (2) │</span><span class="ansi-bright-black-fg">        started at 2026-08-05T11:40:24.996</span>
-<span class="ansi-white-fg">strings</span><span class="ansi-white-fg">      (2) │ </span><span class="ansi-white-fg">    0.21 │ </span><span class="ansi-white-fg">    5.38 │ </span><span class="ansi-white-fg">  96.78 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      6.90 │ </span><span class="ansi-white-fg">  484.92</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">arithmetic   (2) │</span><span class="ansi-bright-black-fg">        started at 2026-08-05T11:40:26.426</span>
-<span class="ansi-white-fg">arithmetic</span><span class="ansi-white-fg">   (2) │ </span><span class="ansi-white-fg">    0.04 │ </span><span class="ansi-white-fg">    0.42 │ </span><span class="ansi-white-fg">  76.02 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      0.90 │ </span><span class="ansi-white-fg">  484.92</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">slow</span><span class="ansi-white-fg">         (1) │ </span><span class="ansi-white-fg">    2.33 │ </span><span class="ansi-white-fg">    4.72 │ </span><span class="ansi-white-fg">  13.68 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      7.08 │ </span><span class="ansi-white-fg">  484.92</span><span class="ansi-white-fg"> │</span>
-
-<span class="ansi-bold">Test Summary:  | </span><span class="ansi-green-fg ansi-bold">Pass  </span><span class="ansi-cyan-fg ansi-bold">Total  </span><span class="ansi-bold">Time</span>
-  Overall      | <span class="ansi-green-fg">   8  </span><span class="ansi-cyan-fg">    8  </span>9.3s
-    strings    | <span class="ansi-green-fg">   2  </span><span class="ansi-cyan-fg">    2  </span>0.2s
-    arithmetic | <span class="ansi-green-fg">   5  </span><span class="ansi-cyan-fg">    5  </span>0.0s
-    slow       | <span class="ansi-green-fg">   1  </span><span class="ansi-cyan-fg">    1  </span>2.2s
-<span class="ansi-green-fg ansi-bold">    SUCCESS</span></pre>
-</div>
-</div>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center">
-<h1>Choosing testing package</h1>
-
-</section>
-<section class="slide level2 wide-slide">
-<h2>Comparison</h2>
+<h2>The 60-bit format</h2>
 <table class="caption-top">
-<colgroup>
-<col style="width: 29%">
-<col style="width: 23%">
-<col style="width: 18%">
-<col style="width: 12%">
-<col style="width: 16%">
-</colgroup>
 <thead>
 <tr class="header">
-<th></th>
-<th>Parallelism</th>
-<th>Rewrite</th>
-<th>Isolation</th>
-<th>Filtering</th>
+<th>Bits</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>Test</code></td>
-<td>❌</td>
-<td>—</td>
-<td>❌</td>
-<td>❌</td>
+<td>0</td>
+<td>Start of minute, always <code>0</code></td>
 </tr>
 <tr class="even">
-<td><code>SafeTestsets.jl</code></td>
-<td>❌</td>
-<td><code>@safetestset</code></td>
-<td>✅</td>
-<td>❌</td>
+<td>1–14</td>
+<td>Civil warning bits, encrypted weather forecast</td>
 </tr>
 <tr class="odd">
-<td><code>TestItemRunner.jl</code></td>
-<td>❌</td>
-<td><code>@testitem</code></td>
-<td>✅</td>
-<td>tags</td>
+<td>15</td>
+<td>Call bit (transmitter abnormality)</td>
 </tr>
 <tr class="even">
-<td><code>ReTestItems.jl</code></td>
-<td>✅ procs, per item</td>
-<td><code>@testitem</code></td>
-<td>✅</td>
-<td>name, tags</td>
+<td>16</td>
+<td>Summer time announcement</td>
 </tr>
 <tr class="odd">
-<td><code>XUnit.jl</code></td>
-<td>✅ threads</td>
-<td><code>@testcase</code></td>
-<td>❌</td>
-<td>✅</td>
+<td>17–18</td>
+<td>CEST / CET flags</td>
 </tr>
 <tr class="even">
-<td><code>ParallelTestRunner.jl</code></td>
-<td>✅ procs, per file</td>
-<td>~none</td>
-<td>✅</td>
-<td>files prefix</td>
+<td>19</td>
+<td>Leap second announcement</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>Start of time information, always <code>1</code></td>
+</tr>
+<tr class="even">
+<td>21–28</td>
+<td>Minutes (BCD) + parity</td>
+</tr>
+<tr class="odd">
+<td>29–35</td>
+<td>Hours (BCD) + parity</td>
+</tr>
+<tr class="even">
+<td>36–57</td>
+<td>Day of month, day of week, month, year in century (BCD)</td>
+</tr>
+<tr class="odd">
+<td>58</td>
+<td>Date parity</td>
+</tr>
+<tr class="even">
+<td>59</td>
+<td>Not transmitted (minute marker)</td>
 </tr>
 </tbody>
 </table>
+</section></section>
+<section>
+<section class="title-slide slide level1 center">
+<h1><code>RadioClock.jl</code></h1>
+
 </section>
 <section class="slide level2">
-<h2>When to choose what</h2>
+<h2>What it is</h2>
 <ul>
-<li>Existing <code>include</code>-style suite, want parallelism with zero rewrite → <code>ParallelTestRunner.jl</code></li>
-<li>Sub-file granularity, retries for flaky tests, tags → <code>ReTestItems.jl</code></li>
-<li>Heavy VS Code test-explorer user → <code>TestItems.jl</code> + <code>TestItemRunner.jl</code></li>
-<li>Need JUnit XML reports, or thread-based parallelism → <code>XUnit.jl</code></li>
-<li>Small, fast suite → plain <code>Test</code> is fine!</li>
+<li>A pure-Julia decoder <em>and</em> encoder for the DCF77 time code: <a href="https://github.com/giordano/RadioClock.jl">github.com/giordano/RadioClock.jl</a></li>
+<li><code>DCF77Data</code>: the whole 60-bit signal stored in a single <code>UInt64</code>, constructible from an integer or a binary string</li>
+<li><code>decode</code> / <code>encode</code> convert between <code>DCF77Data</code> and <code>ZonedDateTime</code></li>
+<li>Scope: it works on the <em>bits</em> — pair it with a radio/SDR front end to get them off the air</li>
+<li>Fast: decoding a signal takes &lt; 50ns</li>
 </ul>
 </section>
 <section class="slide level2">
-<h2>What <code>ParallelTestRunner.jl</code> doesn’t do (yet)</h2>
+<h2>Decoding a signal</h2>
+<p>A minute’s worth of bits, as received on 2025-07-17:</p>
+<div id="2" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">RadioClock</span></span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="fu">DCF77Data</span>(<span class="st">"000000000000000001001000100100000011111010001111001010010010"</span>)</span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>RadioClock.<span class="fu">decode</span>(DCF77, data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>2025-07-17T20:48:00+02:00</code></pre>
+</div>
+</div>
+<p>The pretty-printing of <code>DCF77Data</code> gives the answer away, too:</p>
+<div id="4" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a>data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>Date: 2025-07-17T20:48:00+02:00
+Binary representation: 000000000000000001001000100100000011111010001111001010010010</code></pre>
+</div>
+</div>
+</section>
+<section class="slide level2 scrollable">
+<h2>Radio is noisy: <code>decode</code> checks everything</h2>
 <ul>
-<li>No automatic retries of flaky tests (pending PR <a href="https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148">#148</a>)</li>
-<li>Only prefix-based <em>inclusion</em> filters, no exclusion (issue <a href="https://github.com/JuliaTesting/ParallelTestRunner.jl/issues/134">#134</a>)</li>
-<li>No JUnit XML output</li>
-<li>No editor integration</li>
+<li>Fixed bits are correct (0, 20, 59)</li>
+<li>Even parity of minutes, hours, and date fields</li>
+<li>Exactly one of the CET / CEST flags is set, consistently with the actual DST rules for the decoded instant</li>
+<li>Transmitted day of week matches the decoded date</li>
+</ul>
+<div id="6" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a>corrupted <span class="op">=</span> <span class="fu">DCF77Data</span>(data.x <span class="op">⊻</span> (<span class="fu">UInt64</span>(<span class="fl">1</span>) <span class="op">&lt;&lt;</span> <span class="fl">21</span>))  <span class="co"># noise flipped one bit</span></span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a>RadioClock.<span class="fu">decode</span>(DCF77, corrupted)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<div class="ansi-escaped-output">
+<pre>AssertionError: Minutes data is not consistent with parity check. Input was 0x494f17c09320000
+Stacktrace:
+ [1] <span class="ansi-bold">decode</span><span class="ansi-bold">(</span>::Type<span class="ansi-bright-black-fg">{DCF77}</span>, <span class="ansi-bright-black-fg">data</span>::DCF77Data<span class="ansi-bold">)</span>
+<span class="ansi-bright-black-fg">   @</span> <span class="ansi-magenta-fg">RadioClock</span> <span class="ansi-bright-black-fg">~/.julia/packages/RadioClock/P9EOw/src/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">dcf77.jl:140</span>
+ [2] top-level scope
+<span class="ansi-bright-black-fg">   @</span> <span class="ansi-bright-black-fg">~/work/2026-08-14-juliacon/2026-08-14-juliacon/radioclock/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">index.qmd:105</span></pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+<h2>Time zones-aware</h2>
+<ul>
+<li><code>decode</code> returns a <code>ZonedDateTime</code>, not a naive timestamp</li>
+<li>The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from <a href="https://github.com/JuliaTime/TimeZones.jl"><code>TimeZones.jl</code></a></li>
+<li>The summer time announcement bit must agree with an actual upcoming transition</li>
+<li>The year is represented with only two digits: the signal itself is ambiguous, <code>RadioClock.jl</code> assumes 2000–2099</li>
+</ul>
+</section>
+<section class="slide level2">
+<h2>Encoding: the round trip</h2>
+<p>Generating the signal for a given time:</p>
+<div id="8" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">TimeZones</span></span>
+<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>talk <span class="op">=</span> <span class="fu">ZonedDateTime</span>(<span class="fl">2026</span>, <span class="fl">8</span>, <span class="fl">14</span>, <span class="fl">10</span>, <span class="fl">30</span>, tz<span class="st">"Europe/Berlin"</span>)</span>
+<span id="cb6-3"><a aria-hidden="true" tabindex="-1"></a>signal <span class="op">=</span> RadioClock.<span class="fu">encode</span>(DCF77, talk)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>Date: 2026-08-14T10:30:00+02:00
+Binary representation: 000000000000000001001000011000000101001010101000100110010000</code></pre>
+</div>
+</div>
+<div id="10" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>RadioClock.<span class="fu">decode</span>(DCF77, signal) <span class="op">==</span> talk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>true</code></pre>
+</div>
+</div>
+<p>Handy for generating test data — or for a transmitter of your own<sup>1</sup></p>
+<aside><ol class="aside-footnotes"><li id="fn1"><p>check your local radio regulations before powering an antenna at 77.5 kHz…</p></li></ol></aside></section>
+<section class="slide level2">
+<h2>Implementation notes</h2>
+<ul>
+<li>The whole signal is one <code>UInt64</code>: masks and shifts, no arrays, no allocations</li>
+<li>Small reusable helpers: 2-digit BCD encode/decode, even parity over a bit range</li>
+<li><code>DCF77</code> is an empty struct, a subtype of <code>RadioSignal</code>, used purely for dispatch:</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">decode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, data<span class="op">::</span><span class="dt">DCF77Data</span>) <span class="op">-&gt;</span> ZonedDateTime</span>
+<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">encode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, zdt<span class="op">::</span><span class="dt">ZonedDateTime</span>) <span class="op">-&gt;</span> DCF77Data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Errors are descriptive: they tell you <em>which</em> consistency check failed and on what input</li>
+</ul>
+</section>
+<section class="slide level2">
+<h2>Live demo time</h2>
+</section>
+<section class="slide level2">
+<h2>What’s next</h2>
+<ul>
+<li>More signals behind the same <code>RadioSignal</code> abstraction:
+<ul>
+<li>MSF (60 kHz, UK), WWVB (60 kHz, US), JJY (40/60 kHz, Japan)</li>
+</ul></li>
+<li>Handling the encrypted weather forecast bits is left as an exercise to the reader</li>
 </ul>
 <p>Contributions welcome!</p>
 </section></section>
 <section class="title-slide slide level1 center">
 <h1>Conclusions</h1>
+<div class="columns">
+<div class="column" style="width:60%;">
 <ul>
-<li>Parallelism + isolation + a CLI, for the price of <em>deleting</em> code</li>
-<li>Battle-tested: <a href="https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&amp;type=code">used</a> by over 80 packages already</li>
-<li>Give it a try:
-<ul>
-<li><a href="https://github.com/JuliaTesting/ParallelTestRunner.jl">github.com/JuliaTesting/ParallelTestRunner.jl</a></li>
-<li><a href="https://juliatesting.github.io/ParallelTestRunner.jl/">juliatesting.github.io/ParallelTestRunner.jl</a></li>
-</ul></li>
+<li>DCF77 in, <code>ZonedDateTime</code> out — and back</li>
+<li>Every consistency check the signal allows, including time-zone sanity</li>
+<li>Give it a try:</li>
 </ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Pkg</span></span>
+<span id="cb11-2"><a aria-hidden="true" tabindex="-1"></a><span class="bu">Pkg</span>.<span class="fu">add</span>(url <span class="op">=</span> <span class="st">"https://github.com/giordano/RadioClock.jl"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column" style="width:40%;">
+<div id="" class="qrcode"></div>
+<script type="text/javascript">
+(function() {
+  var script = document.currentScript;
+  var qrcode = script.previousElementSibling;
+  qrcode.qrcode = new QRCode(qrcode, {"colorDark":"#000000","colorLight":"#ffffff","height":"300","text":"https://github.com/giordano/RadioClock.jl","width":"300"});
+  script.remove();
+})();
+</script>
+    
+<p><a href="https://github.com/giordano/RadioClock.jl">github.com/giordano/RadioClock.jl</a></p>
+</div></div>
 <!-- Local Variables: -->
 <!-- mode: markdown -->
 <!-- auto-fill-function: nil -->
@@ -511,6 +451,8 @@ Available memory: <span class="ansi-bold">5.159 GiB</span>; Max worker RSS: <spa
 
 
 </section>
+
+
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

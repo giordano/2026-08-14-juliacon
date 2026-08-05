@@ -4,6 +4,6 @@
     "href": "index.html",
     "title": "JuliaCon 2026 presentations",
     "section": "",
-    "text": "Running tests in parallel with ParallelTestRunner"
+    "text": "Running tests in parallel with ParallelTestRunner\nDecoding radio time signals with RadioClock.jl"
   }
 ]
