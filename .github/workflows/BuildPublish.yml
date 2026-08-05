@@ -59,11 +59,11 @@ jobs:
         git config user.name "${{github.actor}}"
         git config user.email "${{github.actor_id}}+${{github.actor}}@users.noreply.github.com"
 
-    - name: Render and publish presentation
+    - name: Publish presentation
       shell: julia --color=yes --project {0}
       if: github.event_name != 'pull_request'
       run: |
         using quarto_jll: quarto
-        run(`$(quarto()) publish --no-render --no-prompt --no-browser gh-pages paralleltestrunner/index.qmd`)
+        run(`$(quarto()) publish --no-render --no-prompt --no-browser gh-pages`)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
