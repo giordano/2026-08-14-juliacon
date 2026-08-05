@@ -48,6 +48,9 @@ jobs:
         Pkg.instantiate()
 
     - name: Render project
+      working-directory: "paralleltestrunner"
+      # Project will be rendered when publishing, no need to do it twice.
+      if: github.event_name == 'pull_request'
       shell: julia --color=yes --project {0}
       run: |
         using quarto_jll: quarto
@@ -64,7 +67,7 @@ jobs:
       if: github.event_name != 'pull_request'
       run: |
         using quarto_jll: quarto
-        run(`$(quarto()) publish --no-render --no-prompt --no-browser gh-pages`)
+        run(`$(quarto()) publish --no-prompt --no-browser gh-pages`)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
