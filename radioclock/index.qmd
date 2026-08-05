@@ -71,7 +71,7 @@ julia:
 * `DCF77Data`: the whole 60-bit signal stored in a single `UInt64`, constructible from an integer or a binary string
 * `decode` / `encode` convert between `DCF77Data` and `ZonedDateTime`
 * Scope: it works on the *bits* — pair it with a radio/SDR front end to get them off the air
-* Fast: decoding a signal takes < 50ns
+* Fast: decoding a signal in < 50ns
 
 ## Decoding a signal
 
