@@ -1,0 +1,7 @@
+---
+title: "JuliaCon 2026 presentations"
+format: html
+engine: markdown
+---
+
+- [Running tests in parallel with `ParallelTestRunner`](paralleltestrunner/index.html)

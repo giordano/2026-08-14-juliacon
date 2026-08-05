@@ -6,6 +6,7 @@ on:
       - '.github/workflows/BuildPublish.yml'
       - 'Project.toml'
       - 'custom.scss'
+      - '_quarto.yml'
       - '**/index.qmd'
       - 'paralleltestrunner/demo/**'
       - '_extensions/**'
@@ -46,12 +47,11 @@ jobs:
         using Pkg: Pkg
         Pkg.instantiate()
 
-    - name: Render presentation
-      working-directory: "paralleltestrunner"
+    - name: Render project
       shell: julia --color=yes --project {0}
       run: |
         using quarto_jll: quarto
-        run(`$(quarto()) render index.qmd`)
+        run(`$(quarto()) render`)
 
     - name: Configure Git
       if: github.event_name != 'pull_request'
