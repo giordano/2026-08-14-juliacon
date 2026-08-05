@@ -5,3 +5,4 @@ engine: markdown
 ---
 
 - [Running tests in parallel with `ParallelTestRunner`](paralleltestrunner/index.html)
+- [Decoding radio time signals with `RadioClock.jl`](radioclock/index.html)

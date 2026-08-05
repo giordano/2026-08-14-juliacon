@@ -1,6 +1,9 @@
-# JuliaCon 2026 presentation about ParallelTestRunner
+# JuliaCon 2026 presentations
 
-Presentation about [ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl) at JuliaCon 2026.
+Presentations at JuliaCon 2026:
+
+* [ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl): `paralleltestrunner/`
+* [RadioClock.jl](https://github.com/giordano/RadioClock.jl): `radioclock/`
 
 ## Rendering
 
@@ -18,8 +21,8 @@ using quarto_jll
 run(`$(quarto()) check install`)
 ```
 
-Then, if all is good you can render the presentation locally with
+Then, if all is good you can render the presentations locally with
 
 ```julia
-run(`$(quarto()) render index.qmd`)
+run(`$(quarto()) render`)
 ```

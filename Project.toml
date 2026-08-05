@@ -1,12 +1,17 @@
 [deps]
 Demo = "2b85555c-aeb5-4028-83e5-36da634b75a1"
 ParallelTestRunner = "d3525ed8-44d0-4b2c-a655-542cee43accc"
+RadioClock = "494dee28-fb50-4d66-82c2-2f703a44d82e"
+TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 quarto_jll = "b7163347-bfae-5fd9-aba4-19f139889d78"
 
 [sources]
 Demo = {path = "paralleltestrunner/demo"}
+RadioClock = {url = "https://github.com/giordano/RadioClock.jl"}
 
 [compat]
 ParallelTestRunner = "2.6"
+RadioClock = "0.1"
+TimeZones = "1"
 julia = "1.12"
 quarto_jll = "1.7"
