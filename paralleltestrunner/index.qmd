@@ -157,7 +157,6 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 * `testsuite`: provide your own `name => code` dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)
 * `init_code` / `init_worker_code`: set up each sandbox module / each worker
 * `test_worker`: create a custom worker (for example with specific environment variables, or different Julia flags)
-* `RecordType` + `custom_args`: collect domain-specific metrics per test (how the GPU packages track device memory)
 * `exename` / `exeflags` / `env`: control how workers are launched
 
 # Demo
