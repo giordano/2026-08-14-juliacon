@@ -48,7 +48,6 @@ end
 * Wall-clock time grows linearly with the size of the test suite
 * CI machines have many cores... mostly idle
 * State leaks between `include`d files (`using`, globals, method redefinitions)
-* A failure at minute 40 wastes the previous 39 minutes
 * Running *only* `linalg.jl` means editing `runtests.jl`
 
 Various packages in the ecosystem already tried to address some of these shortcomings (more on this later)
@@ -233,18 +232,12 @@ run_demo("--jobs=2", "--verbose")
 * Need JUnit XML reports, or thread-based parallelism → `XUnit.jl`
 * Small, fast suite → plain `Test` is fine!
 
-## What `ParallelTestRunner.jl` doesn't do (yet)
-
-* No automatic retries of flaky tests (pending PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
-* No JUnit XML output
-* No editor integration
-
-Contributions welcome!
-
 # Conclusions
 
 * Parallelism + isolation + a CLI, for the price of *deleting* code
-* Battle-tested: [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages (2 stdlibs)
+* Already [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages (2 stdlibs)
+* Future:
+  * Automatic retries of flaky tests (PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
 * Give it a try:
     * [github.com/JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl)
     * [juliatesting.github.io/ParallelTestRunner.jl](https://juliatesting.github.io/ParallelTestRunner.jl/)
