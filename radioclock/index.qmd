@@ -67,7 +67,7 @@ julia:
 
 ## What it is
 
-* A pure-Julia decoder *and* encoder for the DCF77 time code: [github.com/giordano/RadioClock.jl](https://github.com/giordano/RadioClock.jl)
+* A pure-Julia decoder *and* encoder for the DCF77 time code: <https://github.com/giordano/RadioClock.jl>
 * `DCF77Data`: the whole 60-bit signal stored in a single `UInt64`, constructible from an integer or a binary string
 * `decode` / `encode` convert between `DCF77Data` and `ZonedDateTime`
 * Scope: it works on the *bits* — pair it with a radio/SDR front end to get them off the air

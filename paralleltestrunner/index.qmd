@@ -246,7 +246,7 @@ Contributions welcome!
 # Conclusions
 
 * Parallelism + isolation + a CLI, for the price of *deleting* code
-* Battle-tested: [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages already
+* Battle-tested: [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages (2 stdlibs)
 * Give it a try:
     * [github.com/JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl)
     * [juliatesting.github.io/ParallelTestRunner.jl](https://juliatesting.github.io/ParallelTestRunner.jl/)
