@@ -314,7 +314,7 @@ Mosè Giordano
 <section class="slide level2">
 <h2>What it is</h2>
 <ul>
-<li>A pure-Julia decoder <em>and</em> encoder for the DCF77 time code: <a href="https://github.com/giordano/RadioClock.jl">github.com/giordano/RadioClock.jl</a></li>
+<li>A pure-Julia decoder <em>and</em> encoder for the DCF77 time code: <a href="https://github.com/giordano/RadioClock.jl" class="uri">https://github.com/giordano/RadioClock.jl</a></li>
 <li><code>DCF77Data</code>: the whole 60-bit signal stored in a single <code>UInt64</code>, constructible from an integer or a binary string</li>
 <li><code>decode</code> / <code>encode</code> convert between <code>DCF77Data</code> and <code>ZonedDateTime</code></li>
 <li>Scope: it works on the <em>bits</em> — pair it with a radio/SDR front end to get them off the air</li>
@@ -357,7 +357,7 @@ Binary representation: 000000000000000001001000100100000011111010001111001010010
 <pre>AssertionError: Minutes data is not consistent with parity check. Input was 0x494f17c09320000
 Stacktrace:
  [1] <span class="ansi-bold">decode</span><span class="ansi-bold">(</span>::Type<span class="ansi-bright-black-fg">{DCF77}</span>, <span class="ansi-bright-black-fg">data</span>::DCF77Data<span class="ansi-bold">)</span>
-<span class="ansi-bright-black-fg">   @</span> <span class="ansi-magenta-fg">RadioClock</span> <span class="ansi-bright-black-fg">~/.julia/packages/RadioClock/P9EOw/src/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">dcf77.jl:140</span>
+<span class="ansi-bright-black-fg">   @</span> <span class="ansi-magenta-fg">RadioClock</span> <span class="ansi-bright-black-fg">~/.julia/packages/RadioClock/yqrhr/src/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">dcf77.jl:140</span>
  [2] top-level scope
 <span class="ansi-bright-black-fg">   @</span> <span class="ansi-bright-black-fg">~/work/2026-08-14-juliacon/2026-08-14-juliacon/radioclock/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">index.qmd:105</span></pre>
 </div>
