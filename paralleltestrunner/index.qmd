@@ -58,7 +58,7 @@ Various packages in the ecosystem already tried to address some of these shortco
 
 * Julia's [`Base.runtests`](https://docs.julialang.org/en/v1/stdlib/Test/#Base.runtests) parallel harness
 * adapted by Tim Besard ([`@maleadt`](https://github.com/maleadt)) for CUDA.jl's test infrastructure...
-* ...and copied in all other packages of the GPU ecosystem
+* ...and ***copied*** in all other packages of the GPU ecosystem
 * extracted and generalised as [JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl) by Valentin Churavy ([`@vchuravy`](https://github.com/vchuravy)) + many other contributors
 * Purpose-built for large, slow, resource-hungry suites
 * Used by CUDA.jl, AMDGPU.jl, Enzyme.jl, and more
@@ -118,7 +118,8 @@ Usage: runtests.jl [--help] [--list] [--jobs=N] [TESTS...]
    --quickfail        Fail the entire run as soon as a single test errored.
    --jobs=N           Launch `N` processes to perform tests.
 
-   Remaining arguments filter the tests that will be executed.
+Remaining arguments filter the tests that will be executed.
+Prefix your argument with '!' to instead exclude those tests
 ```
 
 * `julia --project test/runtests.jl linalg` runs only tests whose name starts with `linalg`
@@ -147,7 +148,7 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 
 * Duration and pass/fail history of each test is persisted in a scratch directory
 * Longest-running tests are scheduled first for better load balancing
-* Previously-failing tests are scheduled first to fail fast on re-runs
+* Previously-failing tests are scheduled first
 * Workers exceeding a memory threshold (`max_worker_rss`) are recycled
 * ~Zero configuration required
 
