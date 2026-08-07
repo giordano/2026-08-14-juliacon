@@ -237,7 +237,6 @@ run_demo("--jobs=2", "--verbose")
 ## What `ParallelTestRunner.jl` doesn't do (yet)
 
 * No automatic retries of flaky tests (pending PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
-* Only prefix-based *inclusion* filters, no exclusion (issue [#134](https://github.com/JuliaTesting/ParallelTestRunner.jl/issues/134))
 * No JUnit XML output
 * No editor integration
 
