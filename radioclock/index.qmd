@@ -23,7 +23,9 @@ julia:
     exeflags: ["--color=yes"]
 ---
 
-# How does your wall clock know the time?
+# How do clocks know the time?
+
+![Deutsche Bahn railway station clock (source: [Commons Wikimedia](https://commons.wikimedia.org/wiki/File:Bahnhof_Kinding_(Altm%C3%BChltal),_Bahnsteiguhr_2007.jpg>))](Bahnhof Kinding (Altmühltal), Bahnsteiguhr 2007.jpg)
 
 ## Radio-controlled clocks
 
@@ -44,7 +46,7 @@ julia:
 
 ## Signal amplitude example
 
-![Amplitude modulated signal of DCF77 as a function of time (source: <https://commons.wikimedia.org/wiki/File:DCF77_code.svg>)](DCF77_code.png)
+![Amplitude modulated signal of DCF77 as a function of time (source: [Commons Wikimedia](https://commons.wikimedia.org/wiki/File:DCF77_code.svg))](DCF77_code.png)
 
 ## The 60-bit format{.scrollable}
 
