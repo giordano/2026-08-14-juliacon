@@ -1,6 +1,7 @@
 *.html
 index_files/
 Manifest.toml
+/Manifest-v*.toml
 /.quarto/
 /_site/
 
