@@ -145,6 +145,8 @@ Handy for generating test data
 
 ## Live demo time
 
+![](demo.jpeg)
+
 # Conclusions
 
 :::: {.columns}

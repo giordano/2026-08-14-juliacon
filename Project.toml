@@ -7,7 +7,7 @@ quarto_jll = "b7163347-bfae-5fd9-aba4-19f139889d78"
 
 [sources]
 Demo = {path = "paralleltestrunner/demo"}
-RadioClock = {url = "https://github.com/giordano/RadioClock.jl"}
+RadioClock = {rev = "main", url = "https://github.com/giordano/RadioClock.jl"}
 
 [compat]
 ParallelTestRunner = "2.6"
