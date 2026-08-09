@@ -8,7 +8,8 @@ on:
       - 'custom.scss'
       - '_quarto.yml'
       - '**/index.qmd'
-      - 'paralleltestrunner/demo/**'
+      - 'paralleltestrunner/**'
+      - 'radioclock/**'
       - '_extensions/**'
   push:
     branches:
