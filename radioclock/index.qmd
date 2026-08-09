@@ -145,7 +145,7 @@ Handy for generating test data
 
 ## Live demo time
 
-![](demo.jpeg)
+![](demo.jpg)
 
 # Conclusions
 
