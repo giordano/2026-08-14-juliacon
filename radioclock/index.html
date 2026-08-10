@@ -238,13 +238,9 @@ Mosè Giordano
 </ul></li>
 <li>Second 59: no drop at all — that silence marks the start of the next minute</li>
 <li>59 bits per minute ≈ <strong>1 baud</strong>: possibly the slowest data stream you rely on daily</li>
-<li>Each minute transmits the date and time of the <em>following</em> minute (other protcols are different!)</li>
+<li>Each minute transmits the date and time of the <em>following</em> minute (other protocols are different!)</li>
 </ul>
 </section>
-<section class="slide level2">
-<h2>Signal amplitude example</h2>
-
-<img data-src="DCF77_code.png" class="r-stretch quarto-figure-center"><p class="caption">Amplitude modulated signal of DCF77 as a function of time (source: <a href="https://commons.wikimedia.org/wiki/File:DCF77_code.svg">Commons Wikimedia</a>)</p></section>
 <section class="slide level2 scrollable">
 <h2>The 60-bit format</h2>
 <table class="caption-top">
@@ -305,7 +301,15 @@ Mosè Giordano
 </tr>
 </tbody>
 </table>
-</section></section>
+</section>
+<section class="slide level2">
+<h2>Signal amplitude example</h2>
+
+<img data-src="DCF77_code.png" class="r-stretch quarto-figure-center"><p class="caption">Amplitude modulated signal of DCF77 as a function of time (source: <a href="https://commons.wikimedia.org/wiki/File:DCF77_code.svg">Commons Wikimedia</a>)</p></section>
+<section class="slide level2">
+<h2>Signal in receiver modules</h2>
+
+<img data-src="DCF77__Signal_Scheme.png" class="r-stretch quarto-figure-center"><p class="caption">Diagram of the DCF77 signal at the output pin of a receiver module (source: <a href="https://wolles-elektronikkiste.de/en/dcf77-radio-controlled-clock">Wolles Elektronikkiste</a>)</p></section></section>
 <section>
 <section class="title-slide slide level1 center">
 <h1><code>RadioClock.jl</code></h1>
@@ -342,6 +346,15 @@ Binary representation: 000000000000000001001000100100000011111010001111001010010
 </div>
 </section>
 <section class="slide level2">
+<h2>Time zones-aware</h2>
+<ul>
+<li><code>decode</code> returns a <code>ZonedDateTime</code>, not a <code>DateTime</code></li>
+<li>The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from <a href="https://github.com/JuliaTime/TimeZones.jl"><code>TimeZones.jl</code></a></li>
+<li>The summer time announcement bit must agree with an actual upcoming transition</li>
+<li>The year is represented with only two digits: the signal itself is ambiguous, <code>RadioClock.jl</code> assumes 2000–2099</li>
+</ul>
+</section>
+<section class="slide level2">
 <h2>Consistency checks</h2>
 <ul>
 <li>Fixed bits are correct (0, 20, 59)</li>
@@ -359,19 +372,10 @@ Stacktrace:
  [1] <span class="ansi-bold">decode</span><span class="ansi-bold">(</span>::Type<span class="ansi-bright-black-fg">{DCF77}</span>, <span class="ansi-bright-black-fg">data</span>::DCF77Data<span class="ansi-bold">)</span>
 <span class="ansi-bright-black-fg">   @</span> <span class="ansi-magenta-fg">RadioClock</span> <span class="ansi-bright-black-fg">~/.julia/packages/RadioClock/cfYJb/src/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">dcf77.jl:140</span>
  [2] top-level scope
-<span class="ansi-bright-black-fg">   @</span> <span class="ansi-bright-black-fg">~/work/2026-08-14-juliacon/2026-08-14-juliacon/radioclock/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">index.qmd:107</span></pre>
+<span class="ansi-bright-black-fg">   @</span> <span class="ansi-bright-black-fg">~/work/2026-08-14-juliacon/2026-08-14-juliacon/radioclock/</span><span style="text-decoration:underline" class="ansi-bright-black-fg">index.qmd:118</span></pre>
 </div>
 </div>
 </div>
-</section>
-<section class="slide level2">
-<h2>Time zones-aware</h2>
-<ul>
-<li><code>decode</code> returns a <code>ZonedDateTime</code>, not a <code>DateTime</code></li>
-<li>The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from <a href="https://github.com/JuliaTime/TimeZones.jl"><code>TimeZones.jl</code></a></li>
-<li>The summer time announcement bit must agree with an actual upcoming transition</li>
-<li>The year is represented with only two digits: the signal itself is ambiguous, <code>RadioClock.jl</code> assumes 2000–2099</li>
-</ul>
 </section>
 <section class="slide level2">
 <h2>Encoding: the round trip</h2>
@@ -397,10 +401,10 @@ Binary representation: 000000000000000001001000011000000101001010101000100110010
 <h2>Implementation notes</h2>
 <ul>
 <li><p>The whole signal is one <code>UInt64</code>: masks and shifts, no arrays, no allocations</p></li>
-<li><p>Small reusable helpers: 2-digit BCD encode/decode, even parity over a bit range</p></li>
 <li><p><code>DCF77</code> is an empty struct, a subtype of <code>RadioSignal</code>, used purely for dispatch:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">decode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, data<span class="op">::</span><span class="dt">DCF77Data</span>) <span class="op">-&gt;</span> ZonedDateTime</span>
-<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">encode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, zdt<span class="op">::</span><span class="dt">ZonedDateTime</span>) <span class="op">-&gt;</span> DCF77Data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">decode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, data<span class="op">::</span><span class="dt">Union{DCF77Data,UInt64,String}</span>) <span class="op">-&gt;</span> ZonedDateTime</span>
+<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">encode</span>(<span class="op">::</span><span class="dt">Type{DCF77}</span>, zdt<span class="op">::</span><span class="dt">ZonedDateTime</span>) <span class="op">-&gt;</span> DCF77Data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Design easily extensible to other time signals</p></li>
 </ul>
 </section>
 <section class="slide level2">
