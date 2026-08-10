@@ -42,11 +42,7 @@ julia:
     * drop for 0.2 s → bit `1`
 * Second 59: no drop at all — that silence marks the start of the next minute
 * 59 bits per minute ≈ **1 baud**: possibly the slowest data stream you rely on daily
-* Each minute transmits the date and time of the *following* minute (other protcols are different!)
-
-## Signal amplitude example
-
-![Amplitude modulated signal of DCF77 as a function of time (source: [Commons Wikimedia](https://commons.wikimedia.org/wiki/File:DCF77_code.svg))](DCF77_code.png)
+* Each minute transmits the date and time of the *following* minute (other protocols are different!)
 
 ## The 60-bit format{.scrollable}
 
@@ -64,6 +60,14 @@ julia:
 | 36–57 | Day of month, day of week, month, year in century (BCD)  |
 | 58    | Date parity                                              |
 | 59    | Not transmitted (minute marker)                          |
+
+## Signal amplitude example
+
+![Amplitude modulated signal of DCF77 as a function of time (source: [Commons Wikimedia](https://commons.wikimedia.org/wiki/File:DCF77_code.svg))](DCF77_code.png)
+
+## Signal in receiver modules
+
+![Diagram of the DCF77 signal at the output pin of a receiver module (source: [Wolles Elektronikkiste](https://wolles-elektronikkiste.de/en/dcf77-radio-controlled-clock))](DCF77__Signal_Scheme.png)
 
 # `RadioClock.jl`
 
@@ -93,6 +97,13 @@ The pretty-printing of `DCF77Data` gives the answer away, too:
 data
 ```
 
+## Time zones-aware
+
+* `decode` returns a `ZonedDateTime`, not a `DateTime`
+* The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from [`TimeZones.jl`](https://github.com/JuliaTime/TimeZones.jl)
+* The summer time announcement bit must agree with an actual upcoming transition
+* The year is represented with only two digits: the signal itself is ambiguous, `RadioClock.jl` assumes 2000–2099
+
 ## Consistency checks
 
 * Fixed bits are correct (0, 20, 59)
@@ -106,13 +117,6 @@ data
 corrupted = DCF77Data(data.x ⊻ (UInt64(1) << 21))  # noise flipped one bit
 RadioClock.decode(DCF77, corrupted)
 ```
-
-## Time zones-aware
-
-* `decode` returns a `ZonedDateTime`, not a `DateTime`
-* The CET/CEST flags are cross-checked against the real Europe/Berlin transition rules from [`TimeZones.jl`](https://github.com/JuliaTime/TimeZones.jl)
-* The summer time announcement bit must agree with an actual upcoming transition
-* The year is represented with only two digits: the signal itself is ambiguous, `RadioClock.jl` assumes 2000–2099
 
 ## Encoding: the round trip
 
@@ -135,13 +139,14 @@ Handy for generating test data
 ## Implementation notes
 
 * The whole signal is one `UInt64`: masks and shifts, no arrays, no allocations
-* Small reusable helpers: 2-digit BCD encode/decode, even parity over a bit range
 * `DCF77` is an empty struct, a subtype of `RadioSignal`, used purely for dispatch:
 
    ```{.julia code-line-numbers="false"}
-   decode(::Type{DCF77}, data::DCF77Data) -> ZonedDateTime
+   decode(::Type{DCF77}, data::Union{DCF77Data,UInt64,String}) -> ZonedDateTime
    encode(::Type{DCF77}, zdt::ZonedDateTime) -> DCF77Data
    ```
+
+   Design easily extensible to other time signals
 
 ## Live demo time
 
