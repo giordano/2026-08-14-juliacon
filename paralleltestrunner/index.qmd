@@ -156,7 +156,7 @@ Progress: 2/3 tests completed │ ETA: ~0 min
 
 * `testsuite`: provide your own `name => code` dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)
 * `init_code` / `init_worker_code`: set up each sandbox module / each worker
-* `test_worker`: create a custom worker (for example with specific environment variables, or different Julia flags)
+* `test_worker`: create a custom worker based on test name (for example with specific environment variables, or different Julia flags)
 * `exename` / `exeflags` / `env`: control how workers are launched
 
 # Demo
@@ -238,7 +238,7 @@ run_demo("--jobs=2", "--verbose")
 * Parallelism + isolation + a CLI, for the price of *deleting* code
 * Already [used](https://github.com/search?q=%2Fusing.*+ParallelTestRunner%2F+language%3AJulia++NOT+is%3Aarchived+NOT+is%3Afork+path%3A%2F%5Etest%5C%2Fruntests.jl%2F&type=code) by over 80 packages (2 stdlibs)
 * Future:
-  * Automatic retries of flaky tests (PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148))
+  * Automatic retries of flaky tests (PR [#148](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/148)/[#157](https://github.com/JuliaTesting/ParallelTestRunner.jl/pull/157))
 * Give it a try:
     * [github.com/JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl)
     * [juliatesting.github.io/ParallelTestRunner.jl](https://juliatesting.github.io/ParallelTestRunner.jl/)
