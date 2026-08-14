@@ -40,11 +40,9 @@ using MyPackage, Test
 end
 ```
 
-* One process
-* One file after the other, top to bottom
-
 ## Limitations
 
+* One process
 * Wall-clock time grows linearly with the size of the test suite
 * CI machines have many cores... mostly idle
 * State leaks between `include`d files (`using`, globals, method redefinitions)
