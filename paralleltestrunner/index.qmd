@@ -58,7 +58,7 @@ Various packages in the ecosystem already tried to address some of these shortco
 * adapted by Tim Besard ([`@maleadt`](https://github.com/maleadt)) for CUDA.jl's test infrastructure...
 * ...and ***copied*** in all other packages of the GPU ecosystem
 * extracted and generalised as [JuliaTesting/ParallelTestRunner.jl](https://github.com/JuliaTesting/ParallelTestRunner.jl) by Valentin Churavy ([`@vchuravy`](https://github.com/vchuravy)) + many other contributors
-* Purpose-built for large, slow, resource-hungry suites
+* Purpose-built for large, resource-hungry suites
 * Used by CUDA.jl, AMDGPU.jl, Enzyme.jl, and more
 
 ## Migration is a deletion
