@@ -341,8 +341,8 @@ real terminal rather than executed at render time. -->
 <ul>
 <li><code>testsuite</code>: provide your own <code>name =&gt; code</code> dictionary instead of autodiscovery (for example if some test files should be always excluded, or be run conditionally)</li>
 <li><code>init_code</code> / <code>init_worker_code</code>: set up each sandbox module / each worker</li>
-<li><code>test_worker</code>: create a custom worker based on test name (for example with specific environment variables, or different Julia flags)</li>
 <li><code>exename</code> / <code>exeflags</code> / <code>env</code>: control how workers are launched</li>
+<li><code>test_worker</code>: create a custom worker based on test name (for example with specific environment variables, or different Julia flags)</li>
 </ul>
 </section></section>
 <section>
@@ -381,28 +381,28 @@ real terminal rather than executed at render time. -->
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
 <pre>Running 5 tests using 2 parallel jobs. If this is too many concurrent jobs, specify the `--jobs=N` argument to the tests, or set the `JULIA_CPU_THREADS` environment variable.
-Available memory: <span class="ansi-bold">12.985 GiB</span>; Max worker RSS: <span class="ansi-bold">3.711 GiB</span>
+Available memory: <span class="ansi-bold">13.050 GiB</span>; Max worker RSS: <span class="ansi-bold">3.711 GiB</span>
 <span class="ansi-white-fg">                 │ </span><span class="ansi-white-fg">  Test   │</span><span class="ansi-white-fg">   Init   │</span><span class="ansi-white-fg"> Compile │</span><span class="ansi-white-fg"> ──────────────── CPU ──────────────── │</span>
 <span class="ansi-white-fg">Test</span><span class="ansi-white-fg">    (Worker) │ </span><span class="ansi-white-fg">time (s) │</span><span class="ansi-white-fg"> time (s) │</span><span class="ansi-white-fg">   (%)   │</span><span class="ansi-white-fg"> GC (s) │ GC % │ Alloc (MB) │ RSS (MB) │</span>
-<span class="ansi-white-fg">printing     (1) │</span>        started at 2026-08-14T13:06:14.683
-<span class="ansi-white-fg">broken       (2) │</span>        started at 2026-08-14T13:06:15.493
-<span class="ansi-white-fg">printing</span><span class="ansi-white-fg">     (1) │ </span><span class="ansi-white-fg">    0.25 │ </span><span class="ansi-white-fg">    3.76 │ </span><span class="ansi-white-fg">  97.77 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      7.59 │ </span><span class="ansi-white-fg">  486.61</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">slow         (1) │</span>        started at 2026-08-14T13:06:16.176
-<span class="ansi-white-fg">broken</span><span class="ansi-white-fg">       (2) │ </span><span class="ansi-white-fg">    0.36 │ </span><span class="ansi-white-fg">    4.48 │ </span><span class="ansi-white-fg">  99.16 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">     23.75 │ </span><span class="ansi-white-fg">  486.61</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">strings      (2) │</span>        started at 2026-08-14T13:06:16.884
-<span class="ansi-white-fg">strings</span><span class="ansi-white-fg">      (2) │ </span><span class="ansi-white-fg">    0.09 │ </span><span class="ansi-white-fg">    0.31 │ </span><span class="ansi-white-fg">  92.84 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      2.09 │ </span><span class="ansi-white-fg">  486.61</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">arithmetic   (2) │</span>        started at 2026-08-14T13:06:17.348
-<span class="ansi-white-fg">arithmetic</span><span class="ansi-white-fg">   (2) │ </span><span class="ansi-white-fg">    0.04 │ </span><span class="ansi-white-fg">    0.30 │ </span><span class="ansi-white-fg">  75.64 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      0.90 │ </span><span class="ansi-white-fg">  486.61</span><span class="ansi-white-fg"> │</span>
-<span class="ansi-white-fg">slow</span><span class="ansi-white-fg">         (1) │ </span><span class="ansi-white-fg">    2.08 │ </span><span class="ansi-white-fg">    0.52 │ </span><span class="ansi-white-fg">   3.35 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      1.46 │ </span><span class="ansi-white-fg">  486.61</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">broken       (1) │</span>        started at 2026-08-14T13:09:01.006
+<span class="ansi-white-fg">printing     (2) │</span>        started at 2026-08-14T13:09:01.816
+<span class="ansi-white-fg">broken</span><span class="ansi-white-fg">       (1) │ </span><span class="ansi-white-fg">    0.34 │ </span><span class="ansi-white-fg">    3.71 │ </span><span class="ansi-white-fg">  99.16 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">     23.75 │ </span><span class="ansi-white-fg">  488.35</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">slow         (1) │</span>        started at 2026-08-14T13:09:02.664
+<span class="ansi-white-fg">printing</span><span class="ansi-white-fg">     (2) │ </span><span class="ansi-white-fg">    0.33 │ </span><span class="ansi-white-fg">    4.40 │ </span><span class="ansi-white-fg">  97.82 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      7.59 │ </span><span class="ansi-white-fg">  488.35</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">strings      (2) │</span>        started at 2026-08-14T13:09:03.100
+<span class="ansi-white-fg">strings</span><span class="ansi-white-fg">      (2) │ </span><span class="ansi-white-fg">    0.05 │ </span><span class="ansi-white-fg">    0.30 │ </span><span class="ansi-white-fg">  88.02 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      1.29 │ </span><span class="ansi-white-fg">  488.35</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">arithmetic   (2) │</span>        started at 2026-08-14T13:09:03.565
+<span class="ansi-white-fg">arithmetic</span><span class="ansi-white-fg">   (2) │ </span><span class="ansi-white-fg">    0.05 │ </span><span class="ansi-white-fg">    0.30 │ </span><span class="ansi-white-fg">  76.00 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      0.90 │ </span><span class="ansi-white-fg">  488.35</span><span class="ansi-white-fg"> │</span>
+<span class="ansi-white-fg">slow</span><span class="ansi-white-fg">         (1) │ </span><span class="ansi-white-fg">    2.11 │ </span><span class="ansi-white-fg">    0.31 │ </span><span class="ansi-white-fg">   4.94 │ </span><span class="ansi-white-fg">  0.00 │ </span><span class="ansi-white-fg"> 0.0 │ </span><span class="ansi-white-fg">      2.27 │ </span><span class="ansi-white-fg">  488.35</span><span class="ansi-white-fg"> │</span>
 
 Output generated during execution of 'printing':
 [ <span class="ansi-cyan-fg ansi-bold">[ </span><span class="ansi-cyan-fg ansi-bold">Info: </span>Hello, world
 
 <span class="ansi-bold">Test Summary:  | </span><span class="ansi-green-fg ansi-bold">Pass  </span><span class="ansi-yellow-fg ansi-bold">Broken  </span><span class="ansi-cyan-fg ansi-bold">Total  </span><span class="ansi-bold">Time</span>
-  Overall      | <span class="ansi-green-fg">   9  </span><span class="ansi-yellow-fg">     1  </span><span class="ansi-cyan-fg">   10  </span>9.2s
-    printing   | <span class="ansi-green-fg">   1  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    1  </span>0.2s
+  Overall      | <span class="ansi-green-fg">   9  </span><span class="ansi-yellow-fg">     1  </span><span class="ansi-cyan-fg">   10  </span>9.0s
     broken     | <span class="ansi-green-fg">      </span><span class="ansi-yellow-fg">     1  </span><span class="ansi-cyan-fg">    1  </span>0.3s
-    strings    | <span class="ansi-green-fg">   2  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    2  </span>0.1s
+    printing   | <span class="ansi-green-fg">   1  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    1  </span>0.2s
+    strings    | <span class="ansi-green-fg">   2  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    2  </span>0.0s
     arithmetic | <span class="ansi-green-fg">   5  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    5  </span>0.0s
     slow       | <span class="ansi-green-fg">   1  </span><span class="ansi-yellow-fg">        </span><span class="ansi-cyan-fg">    1  </span>2.1s
 <span class="ansi-green-fg ansi-bold">    SUCCESS</span></pre>
