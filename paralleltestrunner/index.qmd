@@ -199,7 +199,10 @@ function run_demo(args...)
     project = Base.active_project()
     dir = joinpath(dirname(project), "paralleltestrunner", "demo", "test")
     cmd = `$(Base.julia_cmd()) --project=$(project) runtests.jl $(collect(args))`
-    print(readchomp(ignorestatus(setenv(cmd; dir))))
+    str = readchomp(ignorestatus(setenv(cmd; dir)))
+    # `:light_black` is a bit unreadable with this theme, change it to `:grey`.
+    str = replace(str, "\e[90m" => "\e[39m")
+    print(str)
 end
 nothing
 ```
